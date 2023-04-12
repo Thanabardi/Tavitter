@@ -9,7 +9,7 @@ interface WithRouterProps {
   router: NextRouter;
 }
 
-class TweetPage extends Component<WithRouterProps> {
+class UserPage extends Component<WithRouterProps> {
   render(): ReactNode {
     return (
       <>
@@ -32,4 +32,4 @@ class TweetPage extends Component<WithRouterProps> {
     );
   }
 }
-export default withRouter(TweetPage);
+export default withRouter(UserPage);

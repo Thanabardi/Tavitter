@@ -1,18 +1,44 @@
 import { Component, ReactNode } from "react";
 import axios from "axios";
+import { NextRouter, withRouter } from "next/router";
 
-class Navbar extends Component {
+interface WithRouterProps {
+  router: NextRouter;
+}
+
+class Navbar extends Component<WithRouterProps> {
   state = {
+    selectNav: false,
+    searchText: "",
     accountName: "Van Darkholme",
     accountId: "vansamaofficial",
   };
+
+  handleSubmit = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    console.log(this.state.searchText);
+  };
+
+  onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    this.setState({ searchText: event.target.value });
+  };
+
+  handleSelect = (type: string, event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    if (type == "profile") {
+      this.props.router.push(`/user/${this.state.accountId}`);
+    } else if (type == "logout") {
+      alert("logout");
+    }
+  };
+
   render(): ReactNode {
     return (
       <div className="z-20 fixed top-0 w-full bg-white drop-shadow px-5 p-2 grid grid-flow-col place-content-between">
         <a href={"/"} className="text-2xl font-semibold hover:cursor-pointer">
           Tavitter
         </a>
-        <form className="w-full col-span-2">
+        <form onSubmit={this.handleSubmit} className="w-full col-span-2">
           <label className="sr-only">Search</label>
           <div className="relative w-full">
             <input
@@ -20,19 +46,37 @@ class Navbar extends Component {
               id="search"
               type="text"
               placeholder="Search Tavitter"
+              value={this.state.searchText}
+              onChange={this.onChange}
               required
             />
           </div>
         </form>
 
-        <a
-          href={"/user/" + this.state.accountId}
-          className="text-l font-semibold text-app-red m-auto"
+        <button
+          onClick={(e) => this.setState({ selectNav: !this.state.selectNav })}
+          className="text-l font-semibold text-app-red m-auto border py-1 px-2 rounded-md"
         >
           {this.state.accountName}
-        </a>
+        </button>
+        {this.state.selectNav && (
+          <div className="fixed top-12 right-5 bg-white w-fit rounded">
+            <button
+              onClick={(e) => this.handleSelect("profile", e)}
+              className="w-full hover:bg-light-gray p-1 border-b"
+            >
+              Profile
+            </button>
+            <button
+              onClick={(e) => this.handleSelect("logout", e)}
+              className="w-full hover:bg-light-gray p-1 font-semibold"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     );
   }
 }
-export default Navbar;
+export default withRouter(Navbar);

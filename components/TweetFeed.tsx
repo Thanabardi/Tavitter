@@ -53,14 +53,12 @@ class TweetFeed extends Component<Props> {
     ],
   };
   render(): ReactNode {
-    console.log(this.state.userId);
-
     return (
-      <div className="">
+      <>
         {this.state.tweets.map((tweet) => (
           <Tweet key={tweet.id} tweet={tweet} />
         ))}
-      </div>
+      </>
     );
   }
 }

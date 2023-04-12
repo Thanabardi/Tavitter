@@ -38,7 +38,7 @@ class Tweet extends Component<Props> {
   render(): ReactNode {
     return (
       <div
-        className="grid grid-flow-col gap-x-4 border-b p-3 hover:cursor-pointer hover:bg-light-gray"
+        className="relative place-content-start grid grid-flow-col gap-x-4 border-b p-3 hover:cursor-pointer hover:bg-light-gray"
         onClick={() => {
           this.props.router.push(`/tweet/${this.state.id}`);
         }}
@@ -61,12 +61,7 @@ class Tweet extends Component<Props> {
         </div>
         <p className="">{this.state.post}</p>
         <div className="flex text-dark-gray pt-1">
-          <div
-            className="mr-5 hover:text-app-red"
-            onClick={(e) => this.handleSelect("reply", e)}
-          >
-            Reply
-          </div>
+          <div className="mr-5 hover:text-app-red">Reply</div>
           <div
             className="mr-5 hover:text-app-red"
             onClick={(e) => this.handleSelect("retweet", e)}
@@ -78,6 +73,12 @@ class Tweet extends Component<Props> {
             onClick={(e) => this.handleSelect("like", e)}
           >
             Like
+          </div>
+          <div
+            className="hover:text-app-red absolute top-3 right-3"
+            onClick={(e) => this.handleSelect("delete", e)}
+          >
+            Delete
           </div>
         </div>
       </div>

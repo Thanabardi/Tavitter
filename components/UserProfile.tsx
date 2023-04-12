@@ -15,12 +15,14 @@ class UserProfile extends Component<Props> {
         <p className="text-center text-3xl font-semibold">
           {this.state.userId}
         </p>
-        <a
-          href={"../user/" + this.state.userId}
-          className="block text-center text-xl text-dark-gray hover:text-app-red"
-        >
-          {"@" + this.state.userId}
-        </a>
+        <p className="text-center">
+          <a
+            href={"../user/" + this.state.userId}
+            className="text-xl text-dark-gray hover:text-app-red"
+          >
+            {"@" + this.state.userId}
+          </a>
+        </p>
       </div>
     );
   }
