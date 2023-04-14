@@ -57,7 +57,7 @@ class TweetPage extends Component<WithRouterProps> {
                 onChange={this.onChange}
                 required
               />
-              <button className="flex-none bg-app-red px-6 py-1 rounded-full font-medium text-white m-auto">
+              <button className="flex-none bg-app-red px-6 py-1 rounded-full font-medium text-white m-auto hover:brightness-75">
                 Reply
               </button>
             </form>

@@ -1,4 +1,4 @@
-import { Component, ReactNode } from "react";
+import React, { Component, ReactNode } from "react";
 import axios from "axios";
 
 class PostTweet extends Component {
@@ -8,7 +8,7 @@ class PostTweet extends Component {
     tweetText: "",
   };
 
-  handleSubmit = (event: React.SyntheticEvent) => {
+  handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log(this.state.tweetText);
   };
@@ -44,7 +44,7 @@ class PostTweet extends Component {
           <div className="border-t border-light-gray mx-4 grid">
             <div className="text-app-red">+ photo</div>
             <div className="text-app-red text-right">+ video</div>
-            <button className="col-span-2 max-w-fit bg-app-red px-8 py-1.5 mb-3 rounded-full font-medium text-white m-auto">
+            <button className="col-span-2 max-w-fit bg-app-red px-8 py-1.5 mb-3 m-auto rounded-full font-medium text-white hover:brightness-75">
               Taveet
             </button>
           </div>
