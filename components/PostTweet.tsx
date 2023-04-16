@@ -36,7 +36,7 @@ class PostTweet extends Component {
             id="postTweet"
             placeholder="What's happening?"
             rows={10}
-            maxLength={250}
+            maxLength={280}
             value={this.state.tweetText}
             onChange={this.onChange}
             required

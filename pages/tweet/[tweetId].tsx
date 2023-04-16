@@ -48,11 +48,11 @@ class TweetPage extends Component<WithRouterProps> {
             >
               <div className="flex-none bg-light-gray rounded-full w-[48px] h-[48px]" />
               <textarea
-                className="flex-1 h-full w-full  resize-none outline-none"
+                className="flex-1 h-full w-full resize-none outline-none"
                 id="replyTweet"
                 placeholder="Taveet Your reply"
                 rows={4}
-                maxLength={250}
+                maxLength={280}
                 value={this.state.replyText}
                 onChange={this.onChange}
                 required

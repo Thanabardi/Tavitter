@@ -11,6 +11,7 @@ interface WithRouterProps {
 
 class UserPage extends Component<WithRouterProps> {
   render(): ReactNode {
+    const { userId } = this.props.router.query;
     return (
       <>
         <Navbar />
@@ -19,8 +20,8 @@ class UserPage extends Component<WithRouterProps> {
           <div className="pt-12 bg-white col-span-2 border border-light-gray">
             {this.props.router.isReady && (
               <div>
-                <UserProfile userId={this.props.router.query.userId} />
-                <TweetFeed userId={this.props.router.query.userId} />
+                <UserProfile userId={userId} />
+                <TweetFeed userId={userId} />
               </div>
             )}
           </div>

@@ -2,6 +2,7 @@ import { Component, ReactNode } from "react";
 import axios from "axios";
 
 import PopupForm from "./PopupForm";
+import PopupBio from "./PopupBio";
 
 interface Props {}
 
@@ -35,7 +36,7 @@ class Auth extends Component<Props> {
       <>
         <div className="flex gap-2">
           <button
-            className="w-fit bg-white py-1 px-4 rounded-full border border-app-red font-medium text-app-red m-auto hover:brightness-75"
+            className="w-fit bg-white py-1 px-4 rounded-full border border-app-red font-medium text-app-red m-auto hover:bg-light-gray"
             onClick={(e) => this.setState({ createAccPopup: true })}
           >
             Sign up
@@ -54,8 +55,18 @@ class Auth extends Component<Props> {
             confirmButtonL="Log in"
             cancelButton={true}
             field={[
-              { name: "Name", type: "text", placeHolder: "name", input: "" },
-              { name: "Email", type: "email", placeHolder: "email", input: "" },
+              {
+                name: "Name",
+                type: "text",
+                placeHolder: "name",
+                input: "",
+              },
+              {
+                name: "Email",
+                type: "email",
+                placeHolder: "email",
+                input: "",
+              },
             ]}
             callback={this.handleCallbackLogIn}
           />
@@ -67,22 +78,30 @@ class Auth extends Component<Props> {
             confirmButtonL="Next"
             cancelButton={true}
             field={[
-              { name: "Name", type: "text", placeHolder: "name", input: "" },
-              { name: "Email", type: "email", placeHolder: "email", input: "" },
+              {
+                name: "Name",
+                type: "text",
+                placeHolder: "name",
+                input: "",
+              },
+              {
+                name: "Email",
+                type: "email",
+                placeHolder: "email",
+                input: "",
+              },
             ]}
             callback={this.handleCallbackCreateAcc}
           />
         )}
         {this.state.createProfilePopup && (
-          <PopupForm
-            title="Create your account"
+          <PopupBio
+            title="Create profile"
             desc="Step 2 of 2"
-            confirmButtonL="Confirm"
             cancelButton={false}
-            field={[
-              { name: "Name", type: "text", placeHolder: "name", input: "" },
-              { name: "Email", type: "email", placeHolder: "email", input: "" },
-            ]}
+            coverImage=""
+            profileImage=""
+            bio=""
             callback={this.handleCallbackCreateProfile}
           />
         )}

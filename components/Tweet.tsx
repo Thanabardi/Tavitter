@@ -36,7 +36,7 @@ class Tweet extends Component<Props> {
     } else if (type == "like") {
       alert("liked");
     } else if (type == "retweet") {
-      alert("retweet");
+      alert("retaveet");
     } else if (type == "delete") {
       this.setState({ deletePopup: true });
     }
@@ -79,7 +79,7 @@ class Tweet extends Component<Props> {
               className="mr-5 hover:text-app-red"
               onClick={(e) => this.handleSelect("retweet", e)}
             >
-              Retweet
+              Retaveet
             </div>
             <div
               className="mr-5 hover:text-app-red"

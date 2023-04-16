@@ -59,6 +59,7 @@ class PopupForm extends Component<Props> {
                   placeholder={field.placeHolder}
                   name={field.name}
                   type={field.type}
+                  maxLength={45}
                   value={field.input}
                   onChange={(event) => this.onChange(event)}
                   required

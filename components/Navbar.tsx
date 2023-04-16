@@ -67,7 +67,7 @@ class Navbar extends Component<WithRouterProps> {
               required
             />
           </form>
-          {false ? (
+          {true ? (
             <Auth />
           ) : (
             <>
@@ -121,7 +121,12 @@ class Navbar extends Component<WithRouterProps> {
             confirmButtonL="Done"
             cancelButton={true}
             field={[
-              { name: "Name", type: "text", placeHolder: "name", input: "" },
+              {
+                name: "Name",
+                type: "text",
+                placeHolder: "name",
+                input: "",
+              },
               {
                 name: "Description",
                 type: "text",
