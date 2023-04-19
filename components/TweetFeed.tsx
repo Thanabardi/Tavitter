@@ -1,65 +1,35 @@
-import { Component, ReactNode } from "react";
-import axios from "axios";
 import Tweet from "./Tweet";
+
+interface ReplyTweet {
+  _id: string;
+  userId: string;
+  msg: string;
+  createdAt: string;
+}
+
+interface TweetProps {
+  _id: string;
+  userId: string;
+  msg: string;
+  comment: Array<ReplyTweet>;
+  photo: Array<string>;
+  video: Array<string>;
+  like: Array<string>;
+  like_count: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface Props {
   userId?: string | string[];
+  tweets: Array<TweetProps>;
 }
 
-class TweetFeed extends Component<Props> {
-  state = {
-    userId: this.props.userId,
-    tweets: [
-      {
-        id: 1,
-        profileImg: "",
-        accountName: "vansamaofficial",
-        reTweet: "Van Darkholme",
-        displayName: "Van Darkholme",
-        date: new Date("2023-4-11"),
-        post: "I was subconsciously fingering myself one morning, and then I realized I was supposed to be wiping my ass.",
-        postImg: "",
-      },
-      {
-        id: 2,
-        profileImg: "",
-        accountName: "vansamaofficial",
-        reTweet: undefined,
-        displayName: "Van Darkholme",
-        date: new Date("2023-4-11"),
-        post: "I was subconsciously fingering myself one morning, and then I realized I was supposed to be wiping my ass.",
-        postImg: "",
-      },
-      {
-        id: 3,
-        profileImg: "",
-        accountName: "vansamaofficial",
-        reTweet: undefined,
-        displayName: "Van Darkholme",
-        date: new Date("2023-4-11"),
-        post: "I was subconsciously fingering myself one morning, and then I realized I was supposed to be wiping my ass.",
-        postImg: "",
-      },
-      {
-        id: 4,
-        profileImg: "",
-        accountName: "vansamaofficial",
-        reTweet: undefined,
-        displayName: "Van Darkholme",
-        date: new Date("2023-4-11"),
-        post: "I was subconsciously fingering myself one morning, and then I realized I was supposed to be wiping my ass.",
-        postImg: "",
-      },
-    ],
-  };
-  render(): ReactNode {
-    return (
-      <>
-        {this.state.tweets.map((tweet) => (
-          <Tweet key={tweet.id} tweet={tweet} />
-        ))}
-      </>
-    );
-  }
-}
+const TweetFeed = (props: Props) => {
+  return (
+    <>
+      {props.tweets.map((tweet) => <Tweet key={tweet._id} tweet={tweet} />)}
+    </>
+  );
+};
 export default TweetFeed;

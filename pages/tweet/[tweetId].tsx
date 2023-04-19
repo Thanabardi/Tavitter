@@ -1,77 +1,135 @@
-import { Component, ReactNode } from "react";
-import { NextRouter, withRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Navbar from "@/components/Navbar";
 import TweetFeed from "@/components/TweetFeed";
 import PostTweet from "@/components/PostTweet";
 import Tweet from "@/components/Tweet";
+import Head from "next/head";
+import axios from "axios";
+import ReplyTweetFeed from "@/components/ReplyTweetFeed";
 
-interface WithRouterProps {
-  router: NextRouter;
+interface ReplyTweet {
+  _id: string;
+  userId: string;
+  msg: string;
+  createdAt: string;
 }
 
-class TweetPage extends Component<WithRouterProps> {
-  state = {
-    replyText: "",
-  };
+interface TweetProps {
+  _id: string;
+  userId: string;
+  msg: string;
+  comment: Array<ReplyTweet>;
+  photo: Array<string>;
+  video: Array<string>;
+  like: Array<string>;
+  like_count: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
-  handleSubmit = (event: React.SyntheticEvent) => {
+const TweetPage = () => {
+  const router = useRouter();
+  let [tweet, setTweets] = useState<Array<TweetProps>>();
+  let [replyText, setReplyText] = useState("");
+  let [login, setLogin] = useState(false);
+
+  useEffect(() => {
+    async function getAllTweet() {
+      await axios
+        .get(`/api/tweet/id/${router.query.tweetId}`)
+        .then((response) => {
+          if (response.data.length == 0) {
+            router.replace("/");
+          } else {
+            setTweets(response.data);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          window.alert(error.response.data.message);
+        });
+    }
+    if (router.isReady) {
+      getAllTweet();
+    }
+    if (sessionStorage.getItem("user") != null) {
+      setLogin(true);
+    }
+  }, [router.isReady]);
+
+  async function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
-    console.log(this.state.replyText);
+    let user = JSON.parse(sessionStorage.getItem("user") || "{}");
+    await axios
+      .put(
+        `/api/tweet/comment/${router.query.tweetId}`,
+        { msg: replyText },
+        {
+          headers: {
+            Authorization: "Bearer " + user.token,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        router.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+
+        window.alert(error.response.data.message);
+      });
+  }
+
+  const onChange = (event: React.ChangeEvent<HTMLTextAreaElement>): void => {
+    setReplyText(event.target.value);
   };
 
-  onChange = (event: React.ChangeEvent<HTMLTextAreaElement>): void => {
-    this.setState({ replyText: event.target.value });
-  };
-
-  render(): ReactNode {
-    const tweet = {
-      id: 1,
-      profileImg: "",
-      accountName: "vansamaofficial",
-      reTweet: "Van Darkholme",
-      displayName: "Van Darkholme",
-      date: new Date("2023-4-11"),
-      post: "I was subconsciously fingering myself one morning, and then I realized I was supposed to be wiping my ass.",
-      postImg: "",
-    };
-    return (
-      <>
-        <Navbar />
-        <div className="grid grid-cols-4 h-screen">
-          <div className="pt-16"></div>
-          <div className="pt-12 bg-white col-span-2 border border-light-gray">
-            <Tweet tweet={tweet} />
-
+  return (
+    <>
+      <Head>{router.isReady && <title>{router.query.userId}</title>}</Head>
+      <Navbar />
+      <div className="grid grid-cols-4 h-screen">
+        <div className="pt-16"></div>
+        <div className="pt-12 bg-white col-span-2 border border-light-gray">
+          {tweet && <Tweet tweet={tweet[0]} />}
+          {login && (
             <form
-              onSubmit={this.handleSubmit}
+              onSubmit={handleSubmit}
               className="flex gap-4 border-b p-3 h-fit"
             >
-              <div className="flex-none bg-light-gray rounded-full w-[48px] h-[48px]" />
+              <img
+                className="flex-none h-[48px] aspect-[1/1] object-cover rounded-full"
+                src={
+                  JSON.parse(sessionStorage.getItem("user") || "{}").profile.img
+                }
+              />
+              {/* <div className="flex-none bg-light-gray rounded-full w-[48px] h-[48px]" /> */}
               <textarea
                 className="flex-1 h-full w-full resize-none outline-none"
                 id="replyTweet"
                 placeholder="Taveet Your reply"
                 rows={4}
                 maxLength={280}
-                value={this.state.replyText}
-                onChange={this.onChange}
+                value={replyText}
+                onChange={onChange}
                 required
               />
               <button className="flex-none bg-app-red px-6 py-1 rounded-full font-medium text-white m-auto hover:brightness-75">
                 Reply
               </button>
             </form>
-
-            {this.props.router.isReady && (
-              <TweetFeed userId={this.props.router.query.userId} />
-            )}
-          </div>
+          )}
+          {tweet && <ReplyTweetFeed replyTweets={tweet[0].comment} />}
+        </div>
+        {login && (
           <div className="pt-16">
             <PostTweet />
           </div>
-        </div>
-      </>
-    );
-  }
-}
-export default withRouter(TweetPage);
+        )}
+      </div>
+    </>
+  );
+};
+export default TweetPage;

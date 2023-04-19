@@ -1,62 +1,42 @@
-import { Component, ReactNode } from "react";
-import axios from "axios";
-import PopupBio from "./PopupBio";
+interface Profile {
+  _id: string;
+  name: string;
+  desc: string;
+  img: string;
+  cover: string;
+  __v: number;
+  username: string;
+  userId: string;
+}
 
 interface Props {
-  userId?: string | string[];
+  userProfile: Profile;
 }
 
-class UserProfile extends Component<Props> {
-  state = {
-    userId: this.props.userId,
-    // coverImage: this.props.coverImage,
-    // profileImage: this.props.profileImage,
-    // bio: this.props.bio,
-    bioPopup: false,
-  };
-
-  handleCallback = (popupData: Object) => {
-    this.setState({ bioPopup: false });
-    console.log(popupData);
-  };
-
-  render(): ReactNode {
-    return (
-      <>
-        <div className="relative border-b border-light-gray pb-4">
-          <button
-            className="absolute top-2 right-2 w-fit px-2 rounded-full border border-app-red font-medium text-sm text-app-red m-auto hover:brightness-150"
-            onClick={(e) => this.setState({ bioPopup: true })}
-          >
-            Edit profile
-          </button>
-          <div className="bg-light-gray h-[250px] w-[750px]" />
-          <div className="bg-light-gray border-4 border-white rounded-full w-[170px] h-[170px] mx-auto -mt-20" />
-          <p className="text-center text-3xl font-semibold">
-            {this.state.userId}
-          </p>
-          <p className="text-center">
-            <a
-              href={"../user/" + this.state.userId}
-              className="text-xl text-dark-gray hover:text-app-red"
-            >
-              {"@" + this.state.userId}
-            </a>
-          </p>
-        </div>
-        {this.state.bioPopup && (
-          <PopupBio
-            title="Edit profile"
-            desc=""
-            cancelButton={true}
-            coverImage=""
-            profileImage=""
-            bio=""
-            callback={this.handleCallback}
-          />
-        )}
-      </>
-    );
-  }
-}
+const UserProfile = (props: Props) => {
+  return (
+    <div className="relative border-b border-light-gray pb-4">
+      <img
+        className="aspect-[3/1] object-cover w-full"
+        src={props.userProfile.cover}
+      />
+      <img
+        className="relative aspect-[1/1] object-cover rounded-full w-40 -mt-20 mx-auto border-4 border-white"
+        src={props.userProfile.img}
+      />
+      <p className="text-center text-3xl font-semibold">
+        {props.userProfile.name}
+      </p>
+      <p className="text-center">
+        <a
+          href={"../user/" + props.userProfile.userId}
+          className="text-xl text-dark-gray hover:text-app-red"
+        >
+          {"@" + props.userProfile.username}
+        </a>
+      </p>
+      <p className="p-4">{props.userProfile.desc}</p>
+    </div>
+  );
+};
 export default UserProfile;

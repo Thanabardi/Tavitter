@@ -1,112 +1,268 @@
-import { Component, ReactNode } from "react";
-import { NextRouter, withRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import axios from "axios";
+
 import PopupForm from "./PopupForm";
 
-interface WithRouterProps {
-  router: NextRouter;
+interface ReplyTweet {
+  _id: string;
+  userId: string;
+  msg: string;
+  createdAt: string;
 }
 
-interface Props extends WithRouterProps {
-  tweet: {
-    id: number;
-    profileImg?: string;
-    accountName: string;
-    reTweet?: String;
-    displayName: string;
-    date: Date;
-    post: string;
-    postImg?: string;
-  };
+interface TweetProps {
+  _id: string;
+  userId: string;
+  msg: string;
+  comment: Array<ReplyTweet>;
+  photo: Array<string>;
+  video: Array<string>;
+  like: Array<string>;
+  like_count: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-class Tweet extends Component<Props> {
-  state = { deletePopup: false };
+interface Profile {
+  _id: string;
+  name: string;
+  desc: string;
+  img: string;
+  cover: string;
+  __v: number;
+  username: string;
+  userId: string;
+}
 
-  formatDate = () => {
-    let d = this.props.tweet.date?.toString().split(" ");
+interface Props {
+  tweet: TweetProps;
+}
+
+const Tweet = (props: Props) => {
+  const router = useRouter();
+  const videoRef = useRef<HTMLVideoElement>(null!);
+  const [playVideo, setPlayVideo] = useState(false);
+  let [userProfile, setUserProfile] = useState<Profile>();
+  let [login, setLogin] = useState(false);
+  let [owner, setOwner] = useState(false);
+  let [liked, setLiked] = useState({
+    status: false,
+    count: props.tweet.like_count,
+  });
+  let [deletePopup, setDeletePopup] = useState(false);
+
+  useEffect(() => {
+    async function getUserProfile() {
+      await axios
+        .get(`/api/user/profile/${props.tweet.userId}`)
+        .then((response) => {
+          let profile = response.data.profile.pop();
+          profile["username"] = response.data.username;
+          profile["userId"] = response.data._id;
+          setUserProfile(profile);
+        })
+        .catch((error) => {
+          console.log(error);
+          window.alert(error.response.data.message);
+        });
+    }
+    getUserProfile();
+    if (sessionStorage.getItem("user") != null) {
+      setLogin(true);
+    }
+    if (
+      props.tweet.userId ==
+      JSON.parse(sessionStorage.getItem("user") || "{}").id
+    ) {
+      setOwner(true);
+    }
+    if (
+      props.tweet.like.includes(
+        JSON.parse(sessionStorage.getItem("user") || "{}").id
+      )
+    ) {
+      setLiked((values) => ({ ...values, status: true }));
+    }
+  }, []);
+
+  function formatDate() {
+    let d = new Date(props.tweet.createdAt).toString().split(" ");
     return [d[1] + " " + d[2] + ", " + d[3]];
-  };
+  }
 
-  handleSelect = (type: string, event: React.MouseEvent<HTMLElement>) => {
+  function handlePlayVideo(event: React.MouseEvent<HTMLElement>) {
     event.stopPropagation();
-    console.log(type, this.props.tweet.id);
+    setPlayVideo(!playVideo);
+    if (playVideo) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+  }
+
+  function handleSelect(type: string, event: React.MouseEvent<HTMLElement>) {
+    event.stopPropagation();
+    console.log(type, props.tweet);
     if (type == "user") {
-      this.props.router.push(`/user/${this.props.tweet.accountName}`);
+      router.push(`/user/${userProfile?.userId}`);
     } else if (type == "like") {
-      alert("liked");
+      handleLikeTweet();
     } else if (type == "retweet") {
       alert("retaveet");
     } else if (type == "delete") {
-      this.setState({ deletePopup: true });
+      setDeletePopup(true);
     }
-  };
+  }
 
-  handleCallbackDeletePopup = (popupData: Array<Object>) => {
-    this.setState({ deletePopup: false });
-    console.log(popupData);
-  };
+  async function handleCallbackDeletePopup(popupData: Array<Object>) {
+    setDeletePopup(false);
+    if (popupData) {
+      let user = JSON.parse(sessionStorage.getItem("user") || "{}");
+      await axios
+        .delete(`/api/tweet/${props.tweet._id}`, {
+          headers: {
+            Authorization: "Bearer " + user.token,
+          },
+        })
+        .then((response) => {
+          console.log(response.data);
+          router.replace(
+            "/user/" + JSON.parse(sessionStorage.getItem("user") || "{}").id
+          );
+        })
+        .catch((error) => {
+          console.log(error);
+          window.alert(error.response.data.message);
+        });
+    }
+  }
 
-  render(): ReactNode {
-    return (
-      <>
+  async function handleLikeTweet() {
+    let user = JSON.parse(sessionStorage.getItem("user") || "{}");
+    await axios
+      .put(`/api/tweet/like/${props.tweet._id}`, null, {
+        headers: {
+          Authorization: "Bearer " + user.token,
+        },
+      })
+      .then((response) => {
+        console.log("this", response.data);
+        setLiked({
+          status: !liked.status,
+          count: response.data.like_count,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        window.alert(error.response.data.message);
+      });
+  }
+
+  return (
+    <>
+      {userProfile && (
         <div
           className="relative place-content-start grid grid-flow-col gap-x-4 border-b p-3 hover:cursor-pointer hover:bg-light-gray"
           onClick={() => {
-            this.props.router.push(`/tweet/${this.props.tweet.id}`);
+            router.push(`/tweet/${props.tweet._id}`);
           }}
         >
-          {this.props.tweet.reTweet && (
+          {/* {this.props.tweet.reTweet && (
             <p className="col-start-1 flex text-sm text-dark-gray">
               {this.props.tweet.reTweet + " Retweeted"}
             </p>
-          )}
-          <div className="row-start-2 row-span-3 bg-light-gray rounded-full w-[48px] h-[48px] col-end-1 justify-self-end" />
+          )} */}
+          <img
+            className="row-start-2 row-span-5 col-end-1 w-[48px] aspect-[1/1] object-cover rounded-full justify-self-end"
+            src={userProfile?.img}
+          />
           <div className="row-start-2 flex items-center">
-            <p className="mr-2 font-semibold">{this.props.tweet.displayName}</p>
+            <p className="mr-2 font-semibold">{userProfile?.name}</p>
             <div
               className="mr-2 text-dark-gray hover:text-app-red"
-              onClick={(e) => this.handleSelect("user", e)}
+              onClick={(e) => handleSelect("user", e)}
             >
-              {"@" + this.props.tweet.accountName}
+              {"@" + userProfile?.username}
             </div>
-            <p className="text-dark-gray">{"· " + this.formatDate()}</p>
+            <p className="text-dark-gray">{"· " + formatDate()}</p>
           </div>
-          <p className="">{this.props.tweet.post}</p>
+          <p>{props.tweet.msg}</p>
+          <div className="relative">
+            {props.tweet.video.map((video) => {
+              return (
+                <>
+                  {!playVideo && (
+                    <div className="absolute left-[45%] top-[40%] bg-white rounded-full py-3 px-2 border-4 border-app-red font-bold text-app-red m-auto">
+                      Play
+                    </div>
+                  )}
+                  <video
+                    loop
+                    key={0}
+                    ref={videoRef}
+                    onClick={(e) => handlePlayVideo(e)}
+                    className="object-contain rounded-md w-full max-h-[800px] m-auto my-1"
+                  >
+                    <source src={video} type="video/mp4" />
+                  </video>
+                </>
+              );
+            })}
+          </div>
+          {props.tweet.photo.map((photo) => {
+            return (
+              <img
+                key={0}
+                className="object-contain rounded-md w-full max-h-[800px] m-auto my-1"
+                src={photo}
+              />
+            );
+          })}
           <div className="flex text-dark-gray pt-1">
             <div className="mr-5 hover:text-app-red">Reply</div>
-            <div
-              className="mr-5 hover:text-app-red"
-              onClick={(e) => this.handleSelect("retweet", e)}
-            >
-              Retaveet
-            </div>
-            <div
-              className="mr-5 hover:text-app-red"
-              onClick={(e) => this.handleSelect("like", e)}
-            >
-              Like
-            </div>
-            <div
-              className="hover:text-app-red absolute top-3 right-3"
-              onClick={(e) => this.handleSelect("delete", e)}
-            >
-              Delete
-            </div>
+            {/* <div
+            className="mr-5 hover:text-app-red"
+            onClick={(e) => handleSelect("retweet", e)}
+          >
+            Retaveet
+          </div> */}
+            {login ? (
+              <div
+                className={
+                  liked.status
+                    ? "text-app-red hover:text-dark-gray"
+                    : "hover:text-app-red"
+                }
+                onClick={(e) => handleSelect("like", e)}
+              >
+                {liked.count} Like
+              </div>
+            ) : (
+              <div>{liked.count} Like</div>
+            )}
+            {owner && (
+              <div
+                className="hover:text-app-red absolute top-3 right-3"
+                onClick={(e) => handleSelect("delete", e)}
+              >
+                Delete
+              </div>
+            )}
           </div>
         </div>
-        {this.state.deletePopup && (
-          <PopupForm
-            title="Delete Taveet?"
-            desc="This can't be undone and it will be removed from your profile and any accounts that have followed you."
-            confirmButtonL="Delete"
-            cancelButton={true}
-            field={[]}
-            callback={this.handleCallbackDeletePopup}
-          />
-        )}
-      </>
-    );
-  }
-}
-export default withRouter(Tweet);
+      )}
+      {deletePopup && (
+        <PopupForm
+          title="Delete Taveet?"
+          desc="This can't be undone and it will be removed from your profile and any accounts that have followed you."
+          confirmButtonL="Delete"
+          cancelButton={true}
+          field={[]}
+          callback={handleCallbackDeletePopup}
+        />
+      )}
+    </>
+  );
+};
+export default Tweet;
