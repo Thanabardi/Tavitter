@@ -43,7 +43,6 @@ const ReTweet = (props: Props) => {
         })
         .catch((error) => {
           console.log(error);
-          window.alert(error.response.data.message);
         });
     }
     getUserProfile();
@@ -56,7 +55,6 @@ const ReTweet = (props: Props) => {
 
   function handleSelect(type: string, event: React.MouseEvent<HTMLElement>) {
     event.stopPropagation();
-    console.log(type, props.replyTweet);
     if (type == "user") {
       router.push(`/user/${userProfile?.userId}`);
     } else if (type == "like") {
@@ -70,7 +68,6 @@ const ReTweet = (props: Props) => {
 
   function handleCallbackDeletePopup(popupData: Array<Object>) {
     setDeletePopup(false);
-    console.log(popupData);
   }
 
   return (

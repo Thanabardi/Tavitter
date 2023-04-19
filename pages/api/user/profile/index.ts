@@ -6,8 +6,6 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method == "POST") {
-    console.log(req.headers.authorization);
-    
     try {
       const response = await axios.post(
         "http://localhost:80/user/profile",

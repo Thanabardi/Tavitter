@@ -64,7 +64,6 @@ const Tweet = (props: Props) => {
         })
         .catch((error) => {
           console.log(error);
-          window.alert(error.response.data.message);
         });
     }
     getUserProfile();
@@ -103,7 +102,6 @@ const Tweet = (props: Props) => {
 
   function handleSelect(type: string, event: React.MouseEvent<HTMLElement>) {
     event.stopPropagation();
-    console.log(type, props.tweet);
     if (type == "user") {
       router.push(`/user/${userProfile?.userId}`);
     } else if (type == "like") {
@@ -126,7 +124,6 @@ const Tweet = (props: Props) => {
           },
         })
         .then((response) => {
-          console.log(response.data);
           router.replace(
             "/user/" + JSON.parse(sessionStorage.getItem("user") || "{}").id
           );
@@ -147,7 +144,6 @@ const Tweet = (props: Props) => {
         },
       })
       .then((response) => {
-        console.log("this", response.data);
         setLiked({
           status: !liked.status,
           count: response.data.like_count,
@@ -191,9 +187,12 @@ const Tweet = (props: Props) => {
           <div className="relative">
             {props.tweet.video.map((video) => {
               return (
-                <>
+                <div key={"videoDiv"}>
                   {!playVideo && (
-                    <div className="absolute left-[45%] top-[40%] bg-white rounded-full py-3 px-2 border-4 border-app-red font-bold text-app-red m-auto">
+                    <div
+                      key={"playButton"}
+                      className="absolute left-[45%] top-[40%] bg-white rounded-full py-3 px-2 border-4 border-app-red font-bold text-app-red m-auto"
+                    >
                       Play
                     </div>
                   )}
@@ -206,7 +205,7 @@ const Tweet = (props: Props) => {
                   >
                     <source src={video} type="video/mp4" />
                   </video>
-                </>
+                </div>
               );
             })}
           </div>

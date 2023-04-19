@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import Navbar from "@/components/Navbar";
-import TweetFeed from "@/components/TweetFeed";
-import PostTweet from "@/components/PostTweet";
-import Tweet from "@/components/Tweet";
 import Head from "next/head";
 import axios from "axios";
+
+import Navbar from "@/components/Navbar";
+import PostTweet from "@/components/PostTweet";
+import Tweet from "@/components/Tweet";
 import ReplyTweetFeed from "@/components/ReplyTweetFeed";
 
 interface ReplyTweet {
@@ -72,7 +72,6 @@ const TweetPage = () => {
         }
       )
       .then((response) => {
-        console.log(response.data);
         router.reload();
       })
       .catch((error) => {
@@ -105,7 +104,6 @@ const TweetPage = () => {
                   JSON.parse(sessionStorage.getItem("user") || "{}").profile.img
                 }
               />
-              {/* <div className="flex-none bg-light-gray rounded-full w-[48px] h-[48px]" /> */}
               <textarea
                 className="flex-1 h-full w-full resize-none outline-none"
                 id="replyTweet"

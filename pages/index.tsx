@@ -9,7 +9,7 @@ import TweetFeed from "@/components/TweetFeed";
 const Home = () => {
   let [tweets, setTweets] = useState([]);
   useEffect(() => {
-    console.log(JSON.parse(sessionStorage.getItem("user") || "{}"));
+    // console.log(JSON.parse(sessionStorage.getItem("user") || "{}"));
     getAllTweet();
   }, []);
 

@@ -73,8 +73,6 @@ const UserPage = () => {
           },
         })
         .then((response) => {
-          console.log(response.data);
-
           setTweets(response.data);
         })
         .catch((error) => {
@@ -100,7 +98,6 @@ const UserPage = () => {
           {userProfile && (
             <div>
               <UserProfile userProfile={userProfile} />
-              {/* <TweetFeed userId={userId} tweets={[tweet]} /> */}
             </div>
           )}
           {tweets?.map((tweet: TweetProps) => (

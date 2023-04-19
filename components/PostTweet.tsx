@@ -27,12 +27,10 @@ const PostTweet = () => {
         },
       })
       .then((response) => {
-        console.log(response.data);
         router.push("/user/" + user.id);
       })
       .catch((error) => {
         console.log(error);
-
         window.alert(error.response.data.message);
       });
   }
@@ -118,7 +116,6 @@ const PostTweet = () => {
                   </video>
                 );
               })}
-              {/* <p>+ image</p> */}
               <input
                 className="w-full line-clamp-1 my-4 col-start-1
               file:rounded-full file:border file:border-app-red
@@ -130,7 +127,6 @@ const PostTweet = () => {
                 accept=".jpg, .jpeg, .png"
                 onChange={(e) => onImageChange(e)}
               />
-              {/* <label>+ video</label> */}
               <input
                 className="w-full line-clamp-1 my-4 col-start-2
               file:rounded-full file:border file:border-app-red

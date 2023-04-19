@@ -39,7 +39,6 @@ const Auth = () => {
         .then((response) => {
           setLogInPopup(false);
           sessionStorage.setItem("user", JSON.stringify(response.data));
-          console.log(response.data);
           getUserProfile();
         })
         .catch((error) => {
@@ -53,8 +52,7 @@ const Auth = () => {
 
   async function handleCallbackCreateAcc(popupData: Array<Object>) {
     if (popupData) {
-      console.log(popupData);
-      axios
+      await axios
         .post("/api/user/signup", popupData)
         .then((response) => {
           setCreateAccPopup(false);
@@ -73,8 +71,7 @@ const Auth = () => {
   async function handleCallbackCreateProfile(popupData: Array<Object>) {
     let user = JSON.parse(sessionStorage.getItem("user") || "{}");
     if (popupData) {
-      console.log(popupData);
-      axios
+      await axios
         .post("/api/user/profile", popupData, {
           headers: {
             Authorization: "Bearer " + user.token,
@@ -85,7 +82,6 @@ const Auth = () => {
           (user as any)["profile"] = response.data.profile.pop();
           (user as any)["username"] = response.data.username;
           sessionStorage.setItem("user", JSON.stringify(user));
-          console.log(response.data);
           getUserProfile();
         })
         .catch((error) => {

@@ -38,7 +38,6 @@ const Navbar = () => {
       })
       .catch((error) => {
         console.log(error);
-        window.alert(error.response.data.message);
       });
   }
 
@@ -67,6 +66,7 @@ const Navbar = () => {
           getUserProfile();
         })
         .catch((error) => {
+          console.log(error);
           window.alert(error.response.data.message);
         });
     } else {
@@ -77,7 +77,7 @@ const Navbar = () => {
 
   function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
-    console.log(searchText);
+    alert(searchText);
   }
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
