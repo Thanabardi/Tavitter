@@ -61,7 +61,7 @@ const UserPage = () => {
         })
         .catch((error) => {
           console.log(error);
-          window.alert(error.response.data.message);
+          window.alert(error.response?.data.message);
         });
     }
     async function getTweets() {

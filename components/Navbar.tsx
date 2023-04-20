@@ -6,9 +6,25 @@ import PopupForm from "./PopupForm";
 import Auth from "./Auth";
 import PopupBio from "./PopupBio";
 
+type Profile = {
+  _id: string;
+  name: string;
+  desc: string;
+  img: string;
+  cover: string;
+  __v: number;
+};
+
+type User = {
+  id: string;
+  profile?: Profile;
+  token: string;
+  username?: string;
+};
+
 const Navbar = () => {
   const router = useRouter();
-  let [login, setLogin] = useState<boolean>();
+  let [user, setUser] = useState<User>();
   let [selectNav, setSelectNav] = useState(false);
   let [logoutPopup, setLogoutPopup] = useState(false);
   let [editPopup, setEditPopup] = useState(false);
@@ -16,18 +32,15 @@ const Navbar = () => {
 
   useEffect(() => {
     if (sessionStorage.getItem("user") != null) {
-      setLogin(true);
-    } else {
-      setLogin(false);
+      setUser(JSON.parse(window.sessionStorage.getItem("user") || "{}"));
     }
   }, []);
 
   async function getUserProfile() {
-    let user = JSON.parse(sessionStorage.getItem("user") || "{}");
     await axios
       .get("/api/user/profile", {
         headers: {
-          Authorization: "Bearer " + user.token,
+          Authorization: "Bearer " + user?.token,
         },
       })
       .then((response) => {
@@ -45,19 +58,17 @@ const Navbar = () => {
     setLogoutPopup(false);
     setSelectNav(false);
     if (popupData) {
-      setLogin(false);
       sessionStorage.clear();
       router.reload();
     }
   }
 
   async function handleCallbackEditPopup(popupData: Array<Object>) {
-    let user = JSON.parse(sessionStorage.getItem("user") || "{}");
     if (popupData) {
       await axios
         .post("/api/user/profile", popupData, {
           headers: {
-            Authorization: "Bearer " + user.token,
+            Authorization: "Bearer " + user?.token,
           },
         })
         .then((response) => {
@@ -87,9 +98,7 @@ const Navbar = () => {
   function handleSelect(type: string, event: React.MouseEvent<HTMLElement>) {
     event.stopPropagation();
     if (type == "profile") {
-      router.push(
-        `/user/${JSON.parse(sessionStorage.getItem("user") || "{}").id}`
-      );
+      router.push(`/user/${user?.id}`);
     } else if (type == "logout") {
       setLogoutPopup(true);
     } else if (type == "edit") {
@@ -114,13 +123,13 @@ const Navbar = () => {
             required
           /> */}
         </form>
-        {login ? (
+        {user ? (
           <>
             <button
               onClick={(e) => setSelectNav(!selectNav)}
               className="text-l font-semibold bg-white text-app-red m-auto border py-1 px-2 rounded-md hover:bg-light-gray"
             >
-              {JSON.parse(sessionStorage.getItem("user") || "{}").profile.name}
+              {user?.profile ? user.profile.name : "Create Profile"}
             </button>
             {selectNav && (
               <div className="fixed grid w-1/12 top-12 right-5 bg-white rounded shadow-lg">
@@ -145,10 +154,8 @@ const Navbar = () => {
               </div>
             )}
           </>
-        ) : login == false ? (
-          <Auth />
         ) : (
-          <></>
+          <Auth />
         )}
       </div>
       {logoutPopup && (

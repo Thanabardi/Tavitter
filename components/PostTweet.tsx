@@ -2,9 +2,25 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 
+type Profile = {
+  _id: string;
+  name: string;
+  desc: string;
+  img: string;
+  cover: string;
+  __v: number;
+};
+
+type User = {
+  id: string;
+  profile?: Profile;
+  token: string;
+  username?: string;
+};
+
 const PostTweet = () => {
   const router = useRouter();
-  let [login, setLogin] = useState(false);
+  let [user, setUser] = useState<User>();
   let [inputData, setInputData] = useState({
     msg: "",
     photo: [],
@@ -13,21 +29,20 @@ const PostTweet = () => {
 
   useEffect(() => {
     if (sessionStorage.getItem("user") != null) {
-      setLogin(true);
+      setUser(JSON.parse(window.sessionStorage.getItem("user") || "{}"));
     }
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    let user = JSON.parse(sessionStorage.getItem("user") || "{}");
     await axios
       .post("/api/tweet", inputData, {
         headers: {
-          Authorization: "Bearer " + user.token,
+          Authorization: "Bearer " + user?.token,
         },
       })
       .then((response) => {
-        router.push("/user/" + user.id);
+        router.push("/user/" + user?.id);
       })
       .catch((error) => {
         console.log(error);
@@ -56,27 +71,19 @@ const PostTweet = () => {
 
   return (
     <>
-      {login && (
-        <div className="fixed w-[23%] bg-white drop-shadow-xl rounded-xl mx-5 hidden xl:grid">
+      {user && (
+        <div className="fixed w-[23%] bg-white drop-shadow-xl rounded-xl mx-5 hidden xl:grid max-h-[90%] overflow-auto">
           <div className="m-4 grid grid-cols-1">
             <img
               className="row-span-2 col-end-1 row-end-1 w-[48px] aspect-[1/1] object-cover rounded-full"
-              src={
-                JSON.parse(sessionStorage.getItem("user") || "{}").profile.img
-              }
+              src={user.profile?.img}
             />
-            <p className="pl-4 my-auto text-xl">
-              {JSON.parse(sessionStorage.getItem("user") || "{}").profile.name}
-            </p>
+            <p className="pl-4 my-auto text-xl">{user.profile?.name}</p>
             <a
-              href={
-                "../user/" +
-                JSON.parse(sessionStorage.getItem("user") || "{}").id
-              }
+              href={"../user/" + user.id}
               className="pl-4 my-auto text-sm text-dark-gray hover:text-app-red"
             >
-              {"@" +
-                JSON.parse(sessionStorage.getItem("user") || "{}").username}
+              {"@" + user.username}
             </a>
           </div>
           <form onSubmit={handleSubmit} className="row-span-4">
@@ -90,11 +97,11 @@ const PostTweet = () => {
               onChange={onChange}
             />
             <div className="grid border-t border-light-gray mx-4 py-4 gap-2">
-              {inputData.photo.map((photo) => {
+              {inputData.photo.map((photo, id) => {
                 return (
                   <img
-                    key={0}
-                    className="object-cover rounded-md w-full m-auto col-start-1 hover:cursor-pointer"
+                    key={id}
+                    className="object-cover rounded-md w-full m-auto hover:cursor-pointer"
                     onClick={(e) =>
                       setInputData((values) => ({ ...values, photo: [] }))
                     }
@@ -102,12 +109,12 @@ const PostTweet = () => {
                   />
                 );
               })}
-              {inputData.video.map((video) => {
+              {inputData.video.map((video, id) => {
                 return (
                   <video
                     loop
-                    key={0}
-                    className="object-cover rounded-md w-full m-auto col-start-2 hover:cursor-pointer"
+                    key={id}
+                    className="object-cover rounded-md w-full m-auto hover:cursor-pointer border-4 border-double border-app-red"
                     onClick={(e) =>
                       setInputData((values) => ({ ...values, video: [] }))
                     }
@@ -116,28 +123,36 @@ const PostTweet = () => {
                   </video>
                 );
               })}
-              <input
-                className="w-full line-clamp-1 my-4 col-start-1
-              file:rounded-full file:border file:border-app-red
-              file:py-1 file:px-4
-              file:text-sm file:font-medium
-              file:bg-transparent file:text-app-red file:hover:bg-light-gray file:hover:cursor-pointer"
-                name="photo"
-                type="file"
-                accept=".jpg, .jpeg, .png"
-                onChange={(e) => onImageChange(e)}
-              />
-              <input
-                className="w-full line-clamp-1 my-4 col-start-2
-              file:rounded-full file:border file:border-app-red
-              file:py-1 file:px-4
-              file:text-sm file:font-medium
-              file:bg-transparent file:text-app-red file:hover:bg-light-gray file:hover:cursor-pointer"
-                name="video"
-                type="file"
-                accept="video/*"
-                onChange={(e) => onImageChange(e)}
-              />
+              <div className="col-span-2">
+                <label
+                  htmlFor="photo"
+                  className="my-4 hover:cursor-pointer text-app-red mr-2"
+                >
+                  +Photo
+                  <input
+                    className="hidden"
+                    id="photo"
+                    name="photo"
+                    type="file"
+                    accept=".jpg, .jpeg, .png"
+                    onChange={(e) => onImageChange(e)}
+                  />
+                </label>
+                <label
+                  htmlFor="video"
+                  className="my-4 hover:cursor-pointer text-app-red"
+                >
+                  +Video
+                  <input
+                    className="w-full line-clamp-1 my-4 col-start-2 hidden"
+                    id="video"
+                    name="video"
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => onImageChange(e)}
+                  />
+                </label>
+              </div>
               <button className="col-span-2 max-w-fit bg-app-red px-8 py-1.5 m-auto rounded-full font-medium text-white hover:brightness-75">
                 Taveet
               </button>

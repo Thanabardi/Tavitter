@@ -10,8 +10,8 @@ interface Props {
 
 const PopupBio = (props: Props) => {
   let [inputData, setInputData] = useState({
-    img: "",
-    cover: "",
+    img: "/profile_icon.jpg",
+    cover: "/cover.png",
     desc: "",
     name: "",
   });
@@ -85,7 +85,7 @@ const PopupBio = (props: Props) => {
             required
           />
           <textarea
-            className="my-4 border-b w-full outline-none resize-none"
+            className="mt-4 mb-2 border-b w-full outline-none resize-none"
             placeholder="Bio"
             name="desc"
             rows={5}
@@ -93,32 +93,36 @@ const PopupBio = (props: Props) => {
             value={inputData.desc}
             onChange={(e) => onChange(e)}
           />
-          <label>Cover Image</label>
-          <input
-            className="w-full line-clamp-1
-              file:rounded-full file:border file:border-app-red
-              file:py-1 file:px-4
-              file:text-sm file:font-medium
-              file:bg-transparent file:text-app-red file:hover:bg-light-gray file:hover:cursor-pointer"
-            name="cover"
-            type="file"
-            accept=".jpg, .jpeg, .png"
-            required={inputData.cover ? false : true}
-            onChange={(e) => onImageChange(e)}
-          />
-          <label>Profile Image</label>
-          <input
-            className="w-full line-clamp-1
-              file:rounded-full file:border file:border-app-red
-              file:py-1 file:px-4
-              file:text-sm file:font-medium
-              file:bg-transparent file:text-app-red file:hover:bg-light-gray file:hover:cursor-pointer"
-            name="img"
-            type="file"
-            accept=".jpg, .jpeg, .png"
-            required={inputData.img ? false : true}
-            onChange={(e) => onImageChange(e)}
-          />
+          <label
+            htmlFor="cover"
+            className="text-app-red border border-app-red rounded-full px-2 py-1 hover:cursor-pointer mr-2"
+          >
+            Add Cover
+            <input
+              className="w-full line-clamp-1 my-4 col-start-2 hidden"
+              id="cover"
+              name="cover"
+              type="file"
+              accept=".jpg, .jpeg, .png"
+              required={inputData.cover ? false : true}
+              onChange={(e) => onImageChange(e)}
+            />
+          </label>
+          <label
+            htmlFor="image"
+            className="text-app-red border border-app-red rounded-full px-2 py-1 hover:cursor-pointer"
+          >
+            Add Image
+            <input
+              className="w-full line-clamp-1 my-4 col-start-2 hidden"
+              id="image"
+              name="img"
+              type="file"
+              accept=".jpg, .jpeg, .png"
+              required={inputData.img ? false : true}
+              onChange={(e) => onImageChange(e)}
+            />
+          </label>
         </div>
         <button className="w-full bg-app-red px-8 py-1.5 mt-4 rounded-full font-medium text-white m-auto hover:brightness-75">
           Save

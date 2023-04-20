@@ -4,6 +4,22 @@ import axios from "axios";
 
 import PopupForm from "./PopupForm";
 
+interface Profile {
+  _id: string;
+  name: string;
+  desc: string;
+  img: string;
+  cover: string;
+  __v: number;
+}
+
+interface User {
+  id: string;
+  profile?: Profile;
+  token: string;
+  username?: string;
+}
+
 interface ReplyTweet {
   _id: string;
   userId: string;
@@ -24,7 +40,7 @@ interface TweetProps {
   updatedAt: string;
 }
 
-interface Profile {
+interface TweetProfile extends Profile {
   _id: string;
   name: string;
   desc: string;
@@ -43,8 +59,8 @@ const Tweet = (props: Props) => {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null!);
   const [playVideo, setPlayVideo] = useState(false);
-  let [userProfile, setUserProfile] = useState<Profile>();
-  let [login, setLogin] = useState(false);
+  let [userProfile, setUserProfile] = useState<TweetProfile>();
+  let [user, setUser] = useState<User>();
   let [owner, setOwner] = useState(false);
   let [liked, setLiked] = useState({
     status: false,
@@ -68,20 +84,14 @@ const Tweet = (props: Props) => {
     }
     getUserProfile();
     if (sessionStorage.getItem("user") != null) {
-      setLogin(true);
-    }
-    if (
-      props.tweet.userId ==
-      JSON.parse(sessionStorage.getItem("user") || "{}").id
-    ) {
-      setOwner(true);
-    }
-    if (
-      props.tweet.like.includes(
-        JSON.parse(sessionStorage.getItem("user") || "{}").id
-      )
-    ) {
-      setLiked((values) => ({ ...values, status: true }));
+      let user = JSON.parse(window.sessionStorage.getItem("user") || "{}");
+      setUser(user);
+      if (props.tweet.userId == user?.id) {
+        setOwner(true);
+      }
+      if (user && props.tweet.like.includes(user.id)) {
+        setLiked((values) => ({ ...values, status: true }));
+      }
     }
   }, []);
 
@@ -116,11 +126,10 @@ const Tweet = (props: Props) => {
   async function handleCallbackDeletePopup(popupData: Array<Object>) {
     setDeletePopup(false);
     if (popupData) {
-      let user = JSON.parse(sessionStorage.getItem("user") || "{}");
       await axios
         .delete(`/api/tweet/${props.tweet._id}`, {
           headers: {
-            Authorization: "Bearer " + user.token,
+            Authorization: "Bearer " + user?.token,
           },
         })
         .then((response) => {
@@ -136,11 +145,10 @@ const Tweet = (props: Props) => {
   }
 
   async function handleLikeTweet() {
-    let user = JSON.parse(sessionStorage.getItem("user") || "{}");
     await axios
       .put(`/api/tweet/like/${props.tweet._id}`, null, {
         headers: {
-          Authorization: "Bearer " + user.token,
+          Authorization: "Bearer " + user?.token,
         },
       })
       .then((response) => {
@@ -191,7 +199,7 @@ const Tweet = (props: Props) => {
                   {!playVideo && (
                     <div
                       key={"playButton"}
-                      className="absolute left-[45%] top-[40%] bg-white rounded-full py-3 px-2 border-4 border-app-red font-bold text-app-red m-auto"
+                      className="absolute left-[45%] top-[40%] bg-white rounded-full py-3 px-2 border-4 border-app-red font-bold text-app-red"
                     >
                       Play
                     </div>
@@ -226,7 +234,7 @@ const Tweet = (props: Props) => {
           >
             Retaveet
           </div> */}
-            {login ? (
+            {user ? (
               <div
                 className={
                   liked.status
@@ -254,7 +262,7 @@ const Tweet = (props: Props) => {
       {deletePopup && (
         <PopupForm
           title="Delete Taveet?"
-          desc="This can't be undone and it will be removed from your profile and any accounts that have followed you."
+          desc="This can't be undone and it will be removed from your profile."
           confirmButtonL="Delete"
           cancelButton={true}
           field={[]}
