@@ -42,7 +42,7 @@ const PostTweet = () => {
         },
       })
       .then((response) => {
-        router.push("/user/" + user?.id);
+        router.reload();
       })
       .catch((error) => {
         console.log(error);

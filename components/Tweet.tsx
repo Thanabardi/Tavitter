@@ -199,7 +199,7 @@ const Tweet = (props: Props) => {
                   {!playVideo && (
                     <div
                       key={"playButton"}
-                      className="absolute left-[45%] top-[40%] bg-white rounded-full py-3 px-2 border-4 border-app-red font-bold text-app-red"
+                      className="absolute left-[45%] top-[45%] bg-white rounded-full py-3 px-2 border-4 border-app-red font-bold text-app-red"
                     >
                       Play
                     </div>
@@ -227,7 +227,7 @@ const Tweet = (props: Props) => {
             );
           })}
           <div className="flex text-dark-gray pt-1">
-            <div className="mr-5 hover:text-app-red">Reply</div>
+            {user && <div className="mr-5 hover:text-app-red">Reply</div>}
             {/* <div
             className="mr-5 hover:text-app-red"
             onClick={(e) => handleSelect("retweet", e)}
