@@ -66,7 +66,7 @@ const ReTweet = (props: Props) => {
     }
   }
 
-  function handleCallbackDeletePopup(popupData: Array<Object>) {
+  function handleCallbackDeletePopup(popupData: Object) {
     setDeletePopup(false);
   }
 
@@ -94,6 +94,7 @@ const ReTweet = (props: Props) => {
           title="Delete Taveet?"
           desc="This can't be undone and it will be removed from your profile and any accounts that have followed you."
           confirmButtonL="Delete"
+          hyperlink=""
           cancelButton={true}
           field={[]}
           callback={handleCallbackDeletePopup}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { useSession, signOut } from "next-auth/react";
 import axios from "axios";
 
 import PopupForm from "./PopupForm";
@@ -24,6 +25,7 @@ type User = {
 
 const Navbar = () => {
   const router = useRouter();
+  const { data: session } = useSession();
   let [user, setUser] = useState<User>();
   let [selectNav, setSelectNav] = useState(false);
   let [logoutPopup, setLogoutPopup] = useState(false);
@@ -54,16 +56,19 @@ const Navbar = () => {
       });
   }
 
-  function handleCallbackLogoutPopup(popupData: Array<Object>) {
+  function handleCallbackLogoutPopup(popupData: Object) {
     setLogoutPopup(false);
     setSelectNav(false);
     if (popupData) {
+      if (session) {
+        signOut();
+      }
       sessionStorage.clear();
       router.reload();
     }
   }
 
-  async function handleCallbackEditPopup(popupData: Array<Object>) {
+  async function handleCallbackEditPopup(popupData: Object) {
     if (popupData) {
       await axios
         .post("/api/user/profile", popupData, {
@@ -163,6 +168,7 @@ const Navbar = () => {
           title="Log out of Tavitter?"
           desc="You can always log back in at any time."
           confirmButtonL="Log out"
+          hyperlink=""
           cancelButton={true}
           field={[]}
           callback={handleCallbackLogoutPopup}

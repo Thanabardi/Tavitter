@@ -123,7 +123,7 @@ const Tweet = (props: Props) => {
     }
   }
 
-  async function handleCallbackDeletePopup(popupData: Array<Object>) {
+  async function handleCallbackDeletePopup(popupData: Object) {
     setDeletePopup(false);
     if (popupData) {
       await axios
@@ -264,6 +264,7 @@ const Tweet = (props: Props) => {
           title="Delete Taveet?"
           desc="This can't be undone and it will be removed from your profile."
           confirmButtonL="Delete"
+          hyperlink=""
           cancelButton={true}
           field={[]}
           callback={handleCallbackDeletePopup}

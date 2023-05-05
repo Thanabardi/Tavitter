@@ -1,5 +1,7 @@
 import { useState } from "react";
-import Link from "next/link";
+import axios from "axios";
+import { useSession, signIn, signOut } from "next-auth/react"
+import Turnstile from "react-turnstile";
 
 interface InputField {
   name: string;
@@ -13,14 +15,14 @@ interface Props {
   title: string;
   desc: string;
   confirmButtonL: string;
-  cancelButton: boolean;
-  hyperlink: string;
+  type: string;
   callback: Function;
   field: Array<InputField>;
 }
 
-const PopupForm = (props: Props) => {
+const PopupAuth = (props: Props) => {
   let [inputData, setInputData] = useState(props.field);
+  let [captcha, setCaptcha] = useState(false);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,7 +30,16 @@ const PopupForm = (props: Props) => {
     inputData.map((field) => {
       (output as any)[field.name.toLowerCase()] = field.input;
     });
-    props.callback(output);
+    if (captcha) {
+      if (props.type == "login") {
+        signIn("tavitter-login", output)
+      } else if (props.type == "signup") {
+        signIn("tavitter-signup", output)
+      }
+      props.callback(output);
+    } else {
+      alert("Captcha verification failed, please try again");
+    }
   }
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -44,6 +55,22 @@ const PopupForm = (props: Props) => {
       })
     );
   };
+
+  async function handleCaptcha(token: string) {
+    await axios
+      .post("/api/captcha", { token: token })
+      .then((response) => {
+        if (response.data.success) {
+          setCaptcha(true);
+        } else {
+          setCaptcha(false);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        window.alert(error.response.data);
+      });
+  }
 
   return (
     <div className="fixed z-40 w-screen h-screen top-0 left-0 right-0 bottom-0 flex flex-wrap items-center justify-center bg-black bg-opacity-50">
@@ -74,28 +101,24 @@ const PopupForm = (props: Props) => {
             </div>
           );
         })}
-        {props.hyperlink && (
-          <Link
-            href={props.hyperlink}
-            target="_blank"
-            className="text-app-red text-sm"
-          >
-            learn more..
-          </Link>
-        )}
+        <Turnstile
+          className="mx-auto my-5 max-w-[100%] overflow-x-auto bg-white"
+          sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+          theme="light"
+          onVerify={(token) => handleCaptcha(token)}
+        />
+        <button type="button" onClick={() => signIn("github")} className="text-app-red">Continue with Github</button>      
         <button className="w-full bg-app-red px-8 py-1.5 mt-4 rounded-full font-medium text-white m-auto hover:brightness-75">
           {props.confirmButtonL}
         </button>
-        {props.cancelButton && (
-          <div
-            className="w-full text-center bg-white border border-dark-gray px-8 py-1.5 mt-2 rounded-full font-medium text-dark-gray m-auto hover:bg-light-gray hover:cursor-pointer"
-            onClick={(e) => props.callback()}
-          >
-            Cancel
-          </div>
-        )}
+        <div
+          className="w-full text-center bg-white border border-dark-gray px-8 py-1.5 mt-2 rounded-full font-medium text-dark-gray m-auto hover:bg-light-gray hover:cursor-pointer"
+          onClick={(e) => props.callback()}
+        >
+          Cancel
+        </div>
       </form>
     </div>
   );
 };
-export default PopupForm;
+export default PopupAuth;
