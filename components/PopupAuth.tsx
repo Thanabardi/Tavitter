@@ -31,11 +31,11 @@ const PopupAuth = (props: Props) => {
       (output as any)[field.name.toLowerCase()] = field.input;
     });
     if (captcha) {
-      if (props.type == "login") {
-        signIn("tavitter-login", output)
-      } else if (props.type == "signup") {
-        signIn("tavitter-signup", output)
-      }
+      // if (props.type == "login") {
+      //   signIn("tavitter-login", output)
+      // } else if (props.type == "signup") {
+      //   signIn("tavitter-signup", output)
+      // }
       props.callback(output);
     } else {
       alert("Captcha verification failed, please try again");
