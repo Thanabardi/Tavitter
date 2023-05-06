@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
-import axios from "axios";
+import { signIn } from "next-auth/react";
 
 import PopupForm from "./PopupForm";
-import PopupBio from "./PopupBio";
 import PopupAuth from "./PopupAuth";
 
 interface inputCreateAcc {
@@ -17,62 +15,25 @@ interface inputCreateAcc {
 
 const Auth = () => {
   const router = useRouter();
-  const { data: session } = useSession()
   let [logInPopup, setLogInPopup] = useState(false);
   let [createAccPopup, setCreateAccPopup] = useState(false);
   let [createConsent, setCreateConsent] = useState(false);
-  let [createProfilePopup, setCreateProfilePopup] = useState(false);
-
-  useEffect(() => {
-    if (session) {
-      sessionStorage.setItem("user", JSON.stringify(session.user?.name));
-    }
-  }, [session]);
-
-  async function getUserProfile() {
-    let user = JSON.parse(sessionStorage.getItem("user") || "{}");
-    await axios
-      .get("/api/user/profile", {
-        headers: {
-          Authorization: "Bearer " + user.token,
-        },
-      })
-      .then((response) => {
-        setLogInPopup(false);
-        (user as any)["profile"] = response.data.profile.pop();
-        (user as any)["username"] = response.data.username;
-        sessionStorage.setItem("user", JSON.stringify(user));
-        router.reload();
-      })
-      .catch((error) => {
-        console.log(error);
-        window.alert(error.response.data.message);
-      });
-  }
 
   async function handleCallbackLogIn(popupData: Object) {
     if (popupData) {
-      await axios
-        .post("/api/user/login", popupData)
-        .then((response) => {
-          setLogInPopup(false);
-          sessionStorage.setItem("user", JSON.stringify(response.data));
-          getUserProfile();
-        })
-        .catch((error) => {
-          console.log(error);
-          window.alert(error.response.data.message);
-        });
+      signIn("tavitter-login", { ...popupData, redirect: false }).then(
+        ({ ok, error }) => {
+          if (ok) {
+            router.reload();
+          } else {
+            console.log(error);
+            alert(error);
+          }
+        }
+      );
     } else {
       setLogInPopup(false);
     }
-  }
-
-  function handleCallbackCreateCon(popupData: Object) {
-    if (popupData) {
-      setCreateAccPopup(true);
-    }
-    setCreateConsent(false);
   }
 
   async function handleCallbackCreateAcc(popupData: inputCreateAcc) {
@@ -81,46 +42,28 @@ const Auth = () => {
         alert("Password do not match");
       } else {
         delete popupData.confirm;
-        await axios
-          .post("/api/user/signup", popupData)
-          .then((response) => {
-            setCreateAccPopup(false);
-            setCreateProfilePopup(true);
-            sessionStorage.setItem("user", JSON.stringify(response.data));
-          })
-          .catch((error) => {
-            console.log(error);
-            window.alert(error.response.data.message);
-          });
+        signIn("tavitter-signup", { ...popupData, redirect: false }).then(
+          ({ ok, error }) => {
+            if (ok) {
+              setCreateAccPopup(false);
+              router.reload();
+            } else {
+              console.log(error);
+              alert(error);
+            }
+          }
+        );
       }
     } else {
       setCreateAccPopup(false);
     }
   }
 
-  async function handleCallbackCreateProfile(popupData: Object) {
-    let user = JSON.parse(sessionStorage.getItem("user") || "{}");
+  function handleCallbackCreateCon(popupData: Object) {
     if (popupData) {
-      await axios
-        .post("/api/user/profile", popupData, {
-          headers: {
-            Authorization: "Bearer " + user.token,
-          },
-        })
-        .then((response) => {
-          setCreateProfilePopup(false);
-          (user as any)["profile"] = response.data.profile.pop();
-          (user as any)["username"] = response.data.username;
-          sessionStorage.setItem("user", JSON.stringify(user));
-          getUserProfile();
-        })
-        .catch((error) => {
-          console.log(error);
-          window.alert(error.response.data.message);
-        });
-    } else {
-      setCreateProfilePopup(false);
+      setCreateAccPopup(true);
     }
+    setCreateConsent(false);
   }
 
   return (
@@ -212,14 +155,6 @@ const Auth = () => {
             },
           ]}
           callback={handleCallbackCreateAcc}
-        />
-      )}
-      {createProfilePopup && (
-        <PopupBio
-          title="Create profile"
-          desc="Step 2 of 2"
-          cancelButton={false}
-          callback={handleCallbackCreateProfile}
         />
       )}
     </>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import axios from "axios";
 
 import PopupForm from "./PopupForm";
@@ -11,12 +12,6 @@ interface Profile {
   img: string;
   cover: string;
   __v: number;
-}
-
-interface User {
-  id: string;
-  profile?: Profile;
-  token: string;
   username?: string;
 }
 
@@ -41,13 +36,6 @@ interface TweetProps {
 }
 
 interface TweetProfile extends Profile {
-  _id: string;
-  name: string;
-  desc: string;
-  img: string;
-  cover: string;
-  __v: number;
-  username: string;
   userId: string;
 }
 
@@ -57,10 +45,11 @@ interface Props {
 
 const Tweet = (props: Props) => {
   const router = useRouter();
+  const { data: session } = useSession();
   const videoRef = useRef<HTMLVideoElement>(null!);
   const [playVideo, setPlayVideo] = useState(false);
   let [userProfile, setUserProfile] = useState<TweetProfile>();
-  let [user, setUser] = useState<User>();
+  let [profile, setProfile] = useState<Profile>();
   let [owner, setOwner] = useState(false);
   let [liked, setLiked] = useState({
     status: false,
@@ -74,26 +63,30 @@ const Tweet = (props: Props) => {
         .get(`/api/user/profile/${props.tweet.userId}`)
         .then((response) => {
           let profile = response.data.profile.pop();
-          profile["username"] = response.data.username;
-          profile["userId"] = response.data._id;
-          setUserProfile(profile);
+          if (profile) {
+            profile["username"] = response.data.username;
+            profile["userId"] = response.data._id;
+            setUserProfile(profile);
+          }
         })
         .catch((error) => {
           console.log(error);
         });
     }
     getUserProfile();
-    if (sessionStorage.getItem("user") != null) {
-      let user = JSON.parse(window.sessionStorage.getItem("user") || "{}");
-      setUser(user);
-      if (props.tweet.userId == user?.id) {
+    if (sessionStorage.getItem("profile") != null) {
+      let profile = JSON.parse(
+        window.sessionStorage.getItem("profile") || "{}"
+      );
+      setProfile(profile);
+      if (props.tweet.userId == session?.user.id) {
         setOwner(true);
       }
-      if (user && props.tweet.like.includes(user.id)) {
+      if (props.tweet.like.includes(session?.user.id!)) {
         setLiked((values) => ({ ...values, status: true }));
       }
     }
-  }, []);
+  }, [session]);
 
   function formatDate() {
     let d = new Date(props.tweet.createdAt).toString().split(" ");
@@ -129,13 +122,13 @@ const Tweet = (props: Props) => {
       await axios
         .delete(`/api/tweet/${props.tweet._id}`, {
           headers: {
-            Authorization: "Bearer " + user?.token,
+            Authorization: "Bearer " + session?.user.accessToken,
           },
         })
         .then((response) => {
-          router.replace(
-            "/user/" + JSON.parse(sessionStorage.getItem("user") || "{}").id
-          );
+          router
+            .replace("/user/" + session?.user.id)
+            .then(() => router.reload());
         })
         .catch((error) => {
           console.log(error);
@@ -148,7 +141,7 @@ const Tweet = (props: Props) => {
     await axios
       .put(`/api/tweet/like/${props.tweet._id}`, null, {
         headers: {
-          Authorization: "Bearer " + user?.token,
+          Authorization: "Bearer " + session?.user.accessToken,
         },
       })
       .then((response) => {
@@ -227,14 +220,14 @@ const Tweet = (props: Props) => {
             );
           })}
           <div className="flex text-dark-gray pt-1">
-            {user && <div className="mr-5 hover:text-app-red">Reply</div>}
+            {profile && <div className="mr-5 hover:text-app-red">Reply</div>}
             {/* <div
             className="mr-5 hover:text-app-red"
             onClick={(e) => handleSelect("retweet", e)}
           >
             Retaveet
           </div> */}
-            {user ? (
+            {profile ? (
               <div
                 className={
                   liked.status

@@ -7,49 +7,49 @@ import PopupForm from "./PopupForm";
 import Auth from "./Auth";
 import PopupBio from "./PopupBio";
 
-type Profile = {
+interface Profile {
   _id: string;
   name: string;
   desc: string;
   img: string;
   cover: string;
   __v: number;
-};
-
-type User = {
-  id: string;
-  profile?: Profile;
-  token: string;
   username?: string;
-};
+}
 
 const Navbar = () => {
   const router = useRouter();
   const { data: session } = useSession();
-  let [user, setUser] = useState<User>();
+  let [profile, setProfile] = useState<Profile>();
   let [selectNav, setSelectNav] = useState(false);
   let [logoutPopup, setLogoutPopup] = useState(false);
   let [editPopup, setEditPopup] = useState(false);
   let [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    if (sessionStorage.getItem("user") != null) {
-      setUser(JSON.parse(window.sessionStorage.getItem("user") || "{}"));
+    if (sessionStorage.getItem("profile")) {
+      setProfile(JSON.parse(window.sessionStorage.getItem("profile") || "{}"));
+    } else if (session) {
+      getUserProfile();
     }
-  }, []);
+  }, [session]);
 
   async function getUserProfile() {
     await axios
       .get("/api/user/profile", {
         headers: {
-          Authorization: "Bearer " + user?.token,
+          Authorization: ("Bearer " + session?.user.accessToken) as string,
         },
       })
       .then((response) => {
-        (user as any)["profile"] = response.data.profile.pop();
-        (user as any)["username"] = response.data.username;
-        sessionStorage.setItem("user", JSON.stringify(user));
-        router.reload();
+        let profile = response.data.profile.pop();
+        if (profile) {
+          (profile as any)["username"] = response.data.username;
+          setProfile(profile);
+          sessionStorage.setItem("profile", JSON.stringify(profile));
+        } else {
+          setEditPopup(true);
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -60,11 +60,9 @@ const Navbar = () => {
     setLogoutPopup(false);
     setSelectNav(false);
     if (popupData) {
-      if (session) {
-        signOut();
-      }
+      signOut();
       sessionStorage.clear();
-      router.reload();
+      router.replace("/").then(() => router.reload());
     }
   }
 
@@ -73,13 +71,16 @@ const Navbar = () => {
       await axios
         .post("/api/user/profile", popupData, {
           headers: {
-            Authorization: "Bearer " + user?.token,
+            Authorization: "Bearer " + session?.user.accessToken,
           },
         })
         .then((response) => {
           setEditPopup(false);
           setSelectNav(false);
-          getUserProfile();
+          sessionStorage.clear();
+          router
+            .replace("/user/" + session?.user.id)
+            .then(() => router.reload());
         })
         .catch((error) => {
           console.log(error);
@@ -103,7 +104,7 @@ const Navbar = () => {
   function handleSelect(type: string, event: React.MouseEvent<HTMLElement>) {
     event.stopPropagation();
     if (type == "profile") {
-      router.push(`/user/${user?.id}`);
+      router.push(`/user/${session?.user.id}`);
     } else if (type == "logout") {
       setLogoutPopup(true);
     } else if (type == "edit") {
@@ -128,27 +129,29 @@ const Navbar = () => {
             required
           /> */}
         </form>
-        {user ? (
+        {session ? (
           <>
             <button
               onClick={(e) => setSelectNav(!selectNav)}
               className="text-l font-semibold bg-white text-app-red m-auto border py-1 px-2 rounded-md hover:bg-light-gray"
             >
-              {user?.profile ? user.profile.name : "Create Profile"}
+              {profile?.name ? profile.name : "Create Profile"}
             </button>
             {selectNav && (
               <div className="fixed grid w-1/12 top-12 right-5 bg-white rounded shadow-lg">
-                <button
-                  onClick={(e) => handleSelect("profile", e)}
-                  className="hover:bg-light-gray p-1 border-b text-left"
-                >
-                  Profile
-                </button>
+                {profile && (
+                  <button
+                    onClick={(e) => handleSelect("profile", e)}
+                    className="hover:bg-light-gray p-1 border-b text-left"
+                  >
+                    Profile
+                  </button>
+                )}
                 <button
                   onClick={(e) => handleSelect("edit", e)}
                   className="hover:bg-light-gray p-1 border-b text-left"
                 >
-                  Edit Profile
+                  {profile ? "Edit Profile" : "Create Profile"}
                 </button>
                 <button
                   onClick={(e) => handleSelect("logout", e)}
@@ -176,9 +179,9 @@ const Navbar = () => {
       )}
       {editPopup && (
         <PopupBio
-          title="Edit profile"
-          desc=""
-          cancelButton={true}
+          title={profile ? "Edit Profile" : "Create Profile"}
+          desc={profile ? "" : "Step 2 of 2"}
+          cancelButton={profile ? true : false}
           callback={handleCallbackEditPopup}
         />
       )}

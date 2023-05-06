@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import axios from "axios";
-import { useSession, signIn, signOut } from "next-auth/react"
 import Turnstile from "react-turnstile";
 
 interface InputField {
@@ -31,11 +31,6 @@ const PopupAuth = (props: Props) => {
       (output as any)[field.name.toLowerCase()] = field.input;
     });
     if (captcha) {
-      // if (props.type == "login") {
-      //   signIn("tavitter-login", output)
-      // } else if (props.type == "signup") {
-      //   signIn("tavitter-signup", output)
-      // }
       props.callback(output);
     } else {
       alert("Captcha verification failed, please try again");
@@ -94,6 +89,7 @@ const PopupAuth = (props: Props) => {
                 name={field.name}
                 type={field.type}
                 maxLength={45}
+                min={0}
                 value={field.input}
                 onChange={(e) => onChange(e)}
                 required
@@ -107,7 +103,13 @@ const PopupAuth = (props: Props) => {
           theme="light"
           onVerify={(token) => handleCaptcha(token)}
         />
-        <button type="button" onClick={() => signIn("github")} className="text-app-red">Continue with Github</button>      
+        <button
+          type="button"
+          onClick={(e) => signIn("github")}
+          className="text-app-red"
+        >
+          Continue with Github
+        </button>
         <button className="w-full bg-app-red px-8 py-1.5 mt-4 rounded-full font-medium text-white m-auto hover:brightness-75">
           {props.confirmButtonL}
         </button>
