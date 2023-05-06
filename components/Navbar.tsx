@@ -56,12 +56,11 @@ const Navbar = () => {
       });
   }
 
-  function handleCallbackLogoutPopup(popupData: Object) {
+  async function handleCallbackLogoutPopup(popupData: Object) {
     setLogoutPopup(false);
     setSelectNav(false);
     if (popupData) {
-      signOut();
-      sessionStorage.clear();
+      signOut().then(() => sessionStorage.clear());
       router.replace("/").then(() => router.reload());
     }
   }

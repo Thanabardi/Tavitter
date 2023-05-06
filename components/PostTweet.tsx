@@ -24,10 +24,10 @@ const PostTweet = () => {
   });
 
   useEffect(() => {
-    if (session && sessionStorage.getItem("profile")) {
+    if (sessionStorage.getItem("profile")) {
       setProfile(JSON.parse(window.sessionStorage.getItem("profile") || "{}"));
     }
-  }, [session]);
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
