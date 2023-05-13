@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { Account, NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
@@ -16,6 +16,27 @@ interface Token {
 interface Session {
   user: Token;
 }
+
+// async function getUserProfile(token: String) {
+//   try {
+//     const response = await axios.get("http://localhost:80/user/profile", {
+//       headers: {
+//         Authorization: ("Bearer " + token) as string,
+//       },
+//     });
+//     if (response.data.status) {
+//       throw new Error(response.data.msg);
+//     }
+//     let profile = response.data.profile.pop();
+//     delete profile.__v;
+//     delete profile._id;
+//     return profile;
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       throw new Error(error.message);
+//     }
+//   }
+// }
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -84,10 +105,13 @@ export const authOptions: NextAuthOptions = {
       session.user.accessToken = token.accessToken;
       return session;
     },
-    async jwt({ token, user }: { token: Token; user: User }) {
+    async jwt({token, user, account}: {token: Token; user: User; account: Account;}) {
       if (user) {
         token.id = user.id;
         token.accessToken = user.token;
+      }
+      if (account?.provider == "github") {
+        token.accessToken = account.access_token!;
       }
       return token;
     },

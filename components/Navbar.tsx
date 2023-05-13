@@ -8,13 +8,11 @@ import Auth from "./Auth";
 import PopupBio from "./PopupBio";
 
 interface Profile {
-  _id: string;
   name: string;
   desc: string;
   img: string;
   cover: string;
-  __v: number;
-  username?: string;
+  username: string;
 }
 
 const Navbar = () => {
@@ -28,39 +26,58 @@ const Navbar = () => {
 
   useEffect(() => {
     if (sessionStorage.getItem("profile")) {
-      setProfile(JSON.parse(window.sessionStorage.getItem("profile") || "{}"));
+      if (session) {
+        setProfile(JSON.parse(window.sessionStorage.getItem("profile") || "{}"))
+      } else if (session === null) {
+        sessionStorage.clear()
+      }
     } else if (session) {
       getUserProfile();
     }
   }, [session]);
 
   async function getUserProfile() {
-    await axios
-      .get("/api/user/profile", {
-        headers: {
-          Authorization: ("Bearer " + session?.user.accessToken) as string,
-        },
-      })
-      .then((response) => {
-        let profile = response.data.profile.pop();
-        if (profile) {
-          (profile as any)["username"] = response.data.username;
-          setProfile(profile);
-          sessionStorage.setItem("profile", JSON.stringify(profile));
-        } else {
-          setEditPopup(true);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (session?.user.image && session?.user.name) {
+      const profile = {
+        name: session.user.name,
+        desc: "",
+        img: session.user.image,
+        cover: "/cover.png",
+        username: session.user.name!.replace(/\s+/g, ""),
+      };
+      setProfile(profile);
+      sessionStorage.setItem("profile", JSON.stringify(profile));
+    } else {
+      await axios
+        .get("/api/user/profile", {
+          headers: {
+            Authorization: ("Bearer " + session?.user.accessToken) as string,
+          },
+        })
+        .then((response) => {
+          let profile = response.data.profile.pop();
+          if (profile) {
+            delete profile.__v;
+            delete profile._id;
+            (profile as any)["username"] = response.data.username;
+            sessionStorage.setItem("profile", JSON.stringify(profile));
+            setProfile(profile);
+          } else {
+            setEditPopup(true);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }
 
-  async function handleCallbackLogoutPopup(popupData: Object) {
+  function handleCallbackLogoutPopup(popupData: Object) {
     setLogoutPopup(false);
     setSelectNav(false);
     if (popupData) {
-      signOut().then(() => sessionStorage.clear());
+      sessionStorage.clear();
+      signOut();
       router.replace("/").then(() => router.reload());
     }
   }

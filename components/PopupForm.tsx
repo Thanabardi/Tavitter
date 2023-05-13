@@ -48,7 +48,7 @@ const PopupForm = (props: Props) => {
   return (
     <div className="fixed z-40 w-screen h-screen top-0 left-0 right-0 bottom-0 flex flex-wrap items-center justify-center bg-black bg-opacity-50">
       <form
-        className="relative grid bg-white w-1/4 rounded-lg p-6"
+        className="relative grid bg-white w-1/5 rounded-lg p-6"
         onSubmit={(e) => handleSubmit(e)}
       >
         <h1 className="text-2xl font-bold pb-2">{props.title}</h1>

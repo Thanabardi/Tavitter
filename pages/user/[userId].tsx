@@ -10,12 +10,10 @@ import PostTweet from "@/components/PostTweet";
 import UserProfile from "@/components/UserProfile";
 
 interface Profile {
-  _id: string;
   name: string;
   desc: string;
   img: string;
   cover: string;
-  __v: number;
   username: string;
   userId: string;
 }
@@ -53,6 +51,8 @@ const UserPage = () => {
         .then((response) => {
           let profile = response.data.profile.pop();
           if (profile) {
+            delete profile.__v;
+            delete profile._id;
             profile["username"] = response.data.username;
             profile["userId"] = response.data._id;
             setUserProfile(profile);
@@ -65,7 +65,11 @@ const UserPage = () => {
         })
         .catch((error) => {
           console.log(error);
-          window.alert(error.response?.data.message);
+          if(window.sessionStorage.getItem("profile")) {
+            setUserProfile(JSON.parse(window.sessionStorage.getItem("profile") || "{}"));
+          } else {
+            router.replace("/");
+          }
         });
     }
     async function getTweets() {

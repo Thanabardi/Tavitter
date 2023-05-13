@@ -24,10 +24,11 @@ const Auth = () => {
       signIn("tavitter-login", { ...popupData, redirect: false }).then(
         ({ ok, error }) => {
           if (ok) {
+            setLogInPopup(false);
             router.reload();
           } else {
             console.log(error);
-            alert(error);
+            alert(error.message);
           }
         }
       );
@@ -49,7 +50,7 @@ const Auth = () => {
               router.reload();
             } else {
               console.log(error);
-              alert(error);
+              alert(error.message);
             }
           }
         );
@@ -107,8 +108,8 @@ const Auth = () => {
       )}
       {createConsent && (
         <PopupForm
-          title="Terms of Service"
-          desc="You may use the Services only if you agree to form a binding contract with us and are not a person barred from receiving services under the laws of the applicable jurisdiction. In any case, you must be at least 13 years old, or in the case of Periscope 16 years old, to use the Services. If you are accepting these Terms and using the Services on behalf of a company, organization, government, or other legal entity, you represent and warrant that you are authorized to do so and have the authority to bind such entity to these Terms, in which case the words “you” and “your” as used in these Terms shall refer to such entity."
+          title="Consent Form"
+          desc="By accepting the Terms and Conditions of this service, you confirm that you have read and understood our Privacy Notification. You also confirm that you are 20 years old or older."
           confirmButtonL="Accept"
           hyperlink="/term"
           cancelButton={true}

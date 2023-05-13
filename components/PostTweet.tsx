@@ -4,13 +4,11 @@ import { useSession } from "next-auth/react";
 import axios from "axios";
 
 interface Profile {
-  _id: string;
   name: string;
   desc: string;
   img: string;
   cover: string;
-  __v: number;
-  username?: string;
+  username: string;
 }
 
 const PostTweet = () => {

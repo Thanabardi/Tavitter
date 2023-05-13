@@ -6,12 +6,10 @@ import axios from "axios";
 import PopupForm from "./PopupForm";
 
 interface Profile {
-  _id: string;
   name: string;
   desc: string;
   img: string;
   cover: string;
-  __v: number;
   username?: string;
 }
 
@@ -64,6 +62,8 @@ const Tweet = (props: Props) => {
         .then((response) => {
           let profile = response.data.profile.pop();
           if (profile) {
+            delete profile.__v;
+            delete profile._id;
             profile["username"] = response.data.username;
             profile["userId"] = response.data._id;
             setUserProfile(profile);

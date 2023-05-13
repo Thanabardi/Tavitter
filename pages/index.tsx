@@ -11,7 +11,6 @@ const Home = () => {
   const { data: session } = useSession();
   let [tweets, setTweets] = useState([]);
   useEffect(() => {
-    // console.log(JSON.parse(sessionStorage.getItem("user") || "{}"));
     getAllTweet();
   }, []);
 
@@ -40,7 +39,7 @@ const Home = () => {
           <TweetFeed tweets={tweets} />
         </div>
         {session && <div className="pt-16">
-          {/* <PostTweet /> */}
+          <PostTweet />
         </div>}
       </div>
     </>
